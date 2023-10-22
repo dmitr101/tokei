@@ -4,7 +4,7 @@ use std::process;
 use clap::Arg;
 use clap::{crate_description, ArgMatches};
 use colored::Colorize;
-use tokei::{Config, LanguageType, Sort};
+use tokei::{Config, LanguageType, Sort, UserInputOverride};
 
 use crate::{
     cli_utils::{crate_version, parse_or_exit, NumberFormatStyle},
@@ -81,6 +81,14 @@ impl Cli {
                     .takes_value(true)
                     .multiple_values(true)
                     .help("Ignore all files & directories matching the pattern."),
+            )
+            .arg(
+                Arg::new("glob")
+                    .long("glob")
+                    .short('g')
+                    .takes_value(true)
+                    .multiple_values(true)
+                    .help("Only search files and directories matching this pattern."),
             )
             .arg(
                 Arg::new("files")
@@ -294,12 +302,18 @@ impl Cli {
         self.matches.value_of("file_input")
     }
 
-    pub fn ignored_directories(&self) -> Vec<&str> {
-        let mut ignored_directories: Vec<&str> = Vec::new();
+    pub fn user_input_overrides(&self) -> Vec<UserInputOverride> {
+        let mut overrides: Vec<UserInputOverride> = Vec::new();
+
         if let Some(user_ignored) = self.matches.values_of("exclude") {
-            ignored_directories.extend(user_ignored);
+            overrides.extend(user_ignored.map(UserInputOverride::Ignore));
         }
-        ignored_directories
+
+        if let Some(user_globs) = self.matches.values_of("glob") {
+            overrides.extend(user_globs.map(UserInputOverride::Glob));
+        }
+
+        overrides
     }
 
     pub fn input(&self) -> Vec<&str> {
@@ -326,14 +340,18 @@ impl Cli {
                 padding = Padding::NONE,
                 width = Some(lang_w)
             )
-            .with_formatter(vec![table_formatter::table::FormatterFunc::Normal(Colorize::bold)]),
+            .with_formatter(vec![table_formatter::table::FormatterFunc::Normal(
+                Colorize::bold,
+            )]),
             cell!(
                 "Extensions",
                 align = Align::Left,
                 padding = Padding::new(3, 0),
                 width = Some(suffix_w)
             )
-            .with_formatter(vec![table_formatter::table::FormatterFunc::Normal(Colorize::bold)]),
+            .with_formatter(vec![table_formatter::table::FormatterFunc::Normal(
+                Colorize::bold,
+            )]),
         ];
         let content = LanguageType::list()
             .iter()

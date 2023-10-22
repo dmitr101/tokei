@@ -71,7 +71,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         );
     }
 
-    languages.get_statistics(&input, &cli.ignored_directories(), &config);
+    languages.get_statistics(&input, &cli.user_input_overrides(), &config);
     if config.for_each_fn.is_some() {
         process::exit(0);
     }

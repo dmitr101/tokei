@@ -11,9 +11,23 @@ use crate::{
 
 const IGNORE_FILE: &str = ".tokeignore";
 
+// TODO: Should it just be 2 newtypes?
+// TODO: Maybe should leave just the glob as user can always add ! ?
+
+/// Represents a individual programming language. Can be used to provide
+/// information about the language, such as multi line comments, single line
+/// comments, string literal syntax, whether a given language allows nesting
+/// comments.
+pub enum UserInputOverride<'a> {
+    /// Represents a individual programming language. Can be used to provide
+    Ignore(&'a str),
+    /// Represents a individual programming language. Can be used to provide
+    Glob(&'a str),
+}
+
 pub fn get_all_files<A: AsRef<Path>>(
     paths: &[A],
-    ignored_directories: &[&str],
+    user_overrides: &[UserInputOverride],
     languages: &mut BTreeMap<LanguageType, Language>,
     config: &Config,
 ) {
@@ -27,14 +41,25 @@ pub fn get_all_files<A: AsRef<Path>>(
         walker.add(path);
     }
 
-    if !ignored_directories.is_empty() {
+    if !user_overrides.is_empty() {
         let mut overrides = OverrideBuilder::new(".");
 
-        for ignored in ignored_directories {
-            rs_error!(overrides.add(&format!("!{}", ignored)));
+        for user_override in user_overrides {
+            match user_override {
+                UserInputOverride::Ignore(ignored) => {
+                    rs_error!(overrides.add(&format!("!{}", ignored)));
+                }
+                UserInputOverride::Glob(glob) => {
+                    rs_error!(overrides.add(glob));
+                }
+            }
         }
 
-        walker.overrides(overrides.build().expect("Excludes provided were invalid"));
+        walker.overrides(
+            overrides
+                .build()
+                .expect("Excludes or globs provided were invalid"), //TODO: Kinda bad to confuse them
+        );
     }
 
     let ignore = config.no_ignore.map(|b| !b).unwrap_or(true);

@@ -59,4 +59,5 @@ pub use self::{
     language::{Language, LanguageType, Languages},
     sort::Sort,
     stats::{find_char_boundary, CodeStats, Report},
+    utils::fs::UserInputOverride,
 };

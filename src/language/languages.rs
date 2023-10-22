@@ -79,10 +79,10 @@ impl Languages {
     pub fn get_statistics<A: AsRef<Path>>(
         &mut self,
         paths: &[A],
-        ignored: &[&str],
+        user_overrides: &[utils::fs::UserInputOverride],
         config: &Config,
     ) {
-        utils::fs::get_all_files(paths, ignored, &mut self.inner, config);
+        utils::fs::get_all_files(paths, user_overrides, &mut self.inner, config);
         self.inner.par_iter_mut().for_each(|(_, l)| l.total());
     }
 

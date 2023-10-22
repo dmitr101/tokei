@@ -4,7 +4,7 @@ build = "build.rs"
 categories = ["command-line-utilities", "development-tools", "visualization"]
 description = "Count your code, quickly."
 edition = "2018"
-homepage = "https://tokei.rs"
+# homepage = "https://tokei.rs"
 include = [
   "Cargo.lock",
   "Cargo.toml",
@@ -18,8 +18,8 @@ keywords = ["utility", "cli", "cloc", "lines", "statistics"]
 license = "MIT/Apache-2.0"
 name = "tokei"
 readme = "README.md"
-repository = "https://github.com/XAMPPRocky/tokei.git"
-version = "13.0.0-alpha.0"
+# repository = "https://github.com/XAMPPRocky/tokei.git"
+version = "14.0.0-alpha.0"
 
 [features]
 all = ["cbor", "yaml"]
